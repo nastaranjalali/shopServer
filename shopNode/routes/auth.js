@@ -1,15 +1,20 @@
 const express = require("express");
+require("dotenv/config");
+
 const router = express.Router();
 const mongoose = require("mongoose");
 const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const crypt = require("crypto");
-
+const auth = require("../middlewares/auth");
 router.get("/", (req, res) => {
   res.send("it's Auth");
 });
 router.post("/signUp", async (req, res) => {
   console.log("req.body", req.body);
   try {
+    const { fullName, username, password } = req.body;
     var errors = [];
     var usernamePattern = /^[a-zA-Z0-9_\.\-]*$/;
     var passwordPattern =
@@ -29,26 +34,37 @@ router.post("/signUp", async (req, res) => {
             "username must be a combinition of alphabets and numbers and  . and _ !",
         });
       }
-      if (!passwordPattern.test(req.body.password)) {
+      if (!passwordPattern.test(password)) {
         errors.push({ key: "password", errorText: "your password is weak !" });
       }
       res.status(400).json({ errors: errors });
       return;
     }
-    var user = new User({
-      fullName: req.body.fullName,
-      username: req.body.username,
-      password: req.body.password,
-    });
+
     const existUsername = await User.findOne({ username: req.body.username });
     if (existUsername) {
       errors.push({
         key: "username",
         errorText: "this username is already taken !",
       });
-      res.status(400).json({ errors: errors });
+      res.status(409).json({ errors: errors });
       return;
     }
+    encryptedPassword = await bcrypt.hash(req.body.password, 10);
+    var user = new User({
+      fullName: fullName,
+      username: username,
+      password: encryptedPassword,
+    });
+    const token = jwt.sign(
+      { user_id: user._id, username },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "2h",
+      }
+    );
+    user.token = token;
+    console.log(user);
     user
       .save()
       .then((data) => {
@@ -67,29 +83,35 @@ router.post("/signUp", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
+    const { username, password } = req.body;
     var errors = [];
-    var token = crypt.createHmac("sha256", req.body.username).digest("base64");
-    var succuss = false;
-    User.findOne(
-      { username: req.body.username, password: req.body.password },
-      (err, user) => {
-        if (user) {
-          succuss = true;
-          res.status(200).json({ fullName: user.fullName, token: token });
-        } else {
-          errors.push({
-            key: "username",
-            errorText: "this user doesn't exist !",
-          });
+    const user = await User.findOne({ username });
+    console.log({ user });
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const token = jwt.sign(
+        { user_id: user._id, username },
+        process.env.TOKEN_KEY,
+        {
+          expiresIn: "2h",
         }
-        res.status(400).json({ errors: errors });
-        return;
-      }
-    );
+      );
+
+      res.status(200).json(token);
+    } else {
+      errors.push({
+        key: "username",
+        errorText: "username or password is wrong!",
+      });
+      res.status(409).json({ errors: errors });
+      return;
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error });
   }
 });
 
+router.get("/welcome", auth, (req, res) => {
+  res.status(200).send("Welcome 🙌 ");
+});
 module.exports = router;

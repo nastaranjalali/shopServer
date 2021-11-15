@@ -7,16 +7,13 @@ const crypt = require("crypto");
 router.get("/", (req, res) => {
   res.send("it's Auth");
 });
-router.post("/signUp", async (req, res) => {
+router.post("/add", async (req, res) => {
   console.log("req.body", req.body);
   try {
     var errors = [];
-    var usernamePattern = /^[a-zA-Z0-9_\.\-]*$/;
-    var passwordPattern =
-      /(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[^A-Za-z0-9])(?=.{8,})/;
     if (
-      !usernamePattern.test(req.body.username) ||
-      req.body.fullName.length < 3 ||
+      req.body.name.length < 3 ||
+      req.body.price < 0 ||
       !passwordPattern.test(req.body.password)
     ) {
       if (req.body.fullName.length < 3) {
@@ -61,7 +58,7 @@ router.post("/signUp", async (req, res) => {
       });
   } catch (error) {
     console.log(error);
-    res.status(500).json({});
+    res.status(500).json({ error: error });
   }
 });
 

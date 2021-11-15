@@ -2,7 +2,7 @@
   "name": "shopnode",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index",
   "scripts": {
     "start": "nodemon app.js"
   },

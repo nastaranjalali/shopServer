@@ -1,6 +1,9 @@
 const mongoose = require("mongoose");
 
 const UserSchema = mongoose.Schema({
+  // _id: {
+  //   type: Schema.Types.ObjectId,
+  // },
   fullName: {
     type: String,
     require: true,
@@ -13,6 +16,9 @@ const UserSchema = mongoose.Schema({
   password: {
     type: String,
     require: true,
+  },
+  token: {
+    type: String,
   },
   cart: {},
 });

@@ -4,6 +4,7 @@ const http = require("http");
 require("dotenv/config");
 //import routes
 const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/panel");
 
 var app = express();
 
@@ -18,6 +19,8 @@ mongoose.connect(process.env.DB_CONNECTION, () =>
 );
 //use routse
 app.use("/auth", authRoutes);
+app.use("/user", userRoutes);
+
 app.get("/", (req, res) => {
   res.send("it's index");
 });
