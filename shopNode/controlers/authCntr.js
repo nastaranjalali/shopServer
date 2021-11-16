@@ -60,7 +60,12 @@ exports.auth_signup = async function (req, res) {
       .save()
       .then((data) => {
         console.log("saved");
-        res.status(201).json(data);
+        res.status(201).json({
+          token,
+          message: "Successfully Signed up",
+          fullName: data.fullName,
+        });
+        // res.status(201).json(data);
       })
       .catch((err) => {
         console.log("failed" + err);
@@ -87,7 +92,13 @@ exports.auth_login = async function (req, res) {
         }
       );
 
-      res.status(200).json(token);
+      res
+        .status(200)
+        .json({
+          token,
+          message: "Successfully loged in",
+          fullName: user.fullName,
+        });
     } else {
       errors.push({
         key: "username",

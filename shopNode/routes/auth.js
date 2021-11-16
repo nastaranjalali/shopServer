@@ -2,11 +2,6 @@ const express = require("express");
 require("dotenv/config");
 
 const router = express.Router();
-const mongoose = require("mongoose");
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const crypt = require("crypto");
 const auth = require("../middlewares/auth");
 var auth_controller = require("../controlers/authCntr");
 router.get("/", (req, res) => {
