@@ -6,6 +6,7 @@ var cors = require("cors");
 //import routes
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/panel");
+const mainRoutes = require("./routes/main");
 
 var app = express();
 app.use(cors());
@@ -20,7 +21,7 @@ mongoose.connect(process.env.DB_CONNECTION, () =>
 );
 //use routse
 app.use("/auth", authRoutes);
-app.use("/user", userRoutes);
+app.use("/main", mainRoutes);
 
 app.get("/", (req, res) => {
   res.send("it's index");
