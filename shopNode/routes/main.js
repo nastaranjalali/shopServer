@@ -6,6 +6,7 @@ var main_controller = require("../controlers/mailctrl");
 router.get("/", (req, res) => {
   res.send("it's main");
 });
-router.post("/products", main_controller.add_product);
+router.post("/products/add", main_controller.add_product);
+router.get("/products/get", main_controller.get_product);
 
 module.exports = router;

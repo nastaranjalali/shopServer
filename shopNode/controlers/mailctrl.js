@@ -34,7 +34,7 @@ exports.add_product = async function (req, res) {
       res.status(409).json({ errors: errors });
       return;
     }
-    var product = new Product({
+    let product = new Product({
       name: name,
       price: price,
       img: image,
@@ -59,4 +59,10 @@ exports.add_product = async function (req, res) {
     console.log(error);
     res.status(500).json({ error: error });
   }
+};
+exports.get_product = function (req, res) {
+  Product.find({}, (err, products) => {
+    if (err) return handleError(err);
+    res.send(products).status(200);
+  });
 };
