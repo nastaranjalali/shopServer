@@ -63,6 +63,6 @@ exports.add_product = async function (req, res) {
 exports.get_product = function (req, res) {
   Product.find({}, (err, products) => {
     if (err) return handleError(err);
-    res.send(products).status(200);
+    res.status(200).json({ products });
   });
 };
