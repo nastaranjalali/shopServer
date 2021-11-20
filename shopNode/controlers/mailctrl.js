@@ -8,7 +8,7 @@ exports.add_product = async function (req, res) {
   try {
     var errors = [];
     const { name, price, img } = req.body;
-    var image = img && img !== "" ? img : "../assets/images/default.jpg";
+    var image = img && img !== "" ? img : "default.jpg";
 
     if (name.length < 3 || price < 0) {
       if (name.length < 3) {

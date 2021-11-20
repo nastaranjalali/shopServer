@@ -20,6 +20,7 @@ mongoose.connect(process.env.DB_CONNECTION, () =>
   console.log("connected to db")
 );
 app.use(express.static("public"));
+
 //use routse
 app.use("/auth", authRoutes);
 app.use("/main", mainRoutes);
