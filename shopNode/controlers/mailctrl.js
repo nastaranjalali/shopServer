@@ -66,3 +66,6 @@ exports.get_product = function (req, res) {
     res.status(200).json({ products });
   });
 };
+exports.paginate = function (req, res) {
+  res.json(res.paginatedResults);
+};
