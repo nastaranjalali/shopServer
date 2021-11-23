@@ -24,6 +24,7 @@ app.use(express.static("public"));
 //use routse
 app.use("/auth", authRoutes);
 app.use("/main", mainRoutes);
+app.use("/panel", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("it's index");
