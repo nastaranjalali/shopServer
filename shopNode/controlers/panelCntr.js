@@ -6,21 +6,16 @@ exports.add_product = async function (req, res) {
   console.log("req.body", req.body);
   try {
     var errors = [];
-    const { username, name, quantity } = req.body;
+    const { name, quantity } = req.body;
 
-    if (!name || !username || quantity < 0) {
+    if (!name || quantity < 0) {
       if (!name) {
         errors.push({
           key: "product",
           errorText: "there is no product selected!",
         });
       }
-      if (!username) {
-        errors.push({
-          key: "user",
-          errorText: "there is no user selected!",
-        });
-      }
+
       if (quantity < 0) {
         errors.push({
           key: "quantity",
@@ -32,10 +27,9 @@ exports.add_product = async function (req, res) {
       return;
     }
 
-    const foundUser = await User.findOne({ username });
+    const foundUser = await User.findOne({ username: req.user.username });
     const foundProduct = await Product.findOne({ name });
-    // console.log("found user :" + foundUser);
-    //console.log("found product :" + foundProduct);
+
     if (foundUser && foundProduct) {
       let foundCart = await Cart.findOne({ user: foundUser._id });
       if (foundCart) {
@@ -46,7 +40,7 @@ exports.add_product = async function (req, res) {
         if (productExistsInCart >= 0) {
           foundCart.products[productExistsInCart].quantity += quantity;
           await foundCart.save();
-          res.status(200).json(foundCart);
+          res.status(200).json({ foundCart, user: req.user });
         } else {
           foundCart.products.push({
             product_id: foundProduct._id,
