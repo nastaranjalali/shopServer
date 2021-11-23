@@ -9,6 +9,6 @@ router.get("/", (req, res) => {
 });
 router.post("/cart/", verifyToken, panel_controller.add_product);
 router.delete("/cart/:id", verifyToken, panel_controller.delete_product);
-// router.get("/cart", panel_controller.get_cart);
+router.get("/cart", verifyToken, panel_controller.get_cart);
 
 module.exports = router;

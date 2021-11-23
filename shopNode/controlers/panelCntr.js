@@ -70,6 +70,7 @@ exports.add_product = async function (req, res) {
         errorText: "user or product does not exist !",
       });
       res.status(404).json({ errors: errors });
+      return;
     }
   } catch (error) {
     console.log(error);
@@ -120,9 +121,42 @@ exports.delete_product = async function (req, res) {
     res.status(500).json({ error: error });
   }
 };
-// exports.get_cart = function (req, res) {
-//   Product.find({}, (err, products) => {
-//     if (err) return handleError(err);
-//     res.status(200).json({ products });
-//   });
-// };
+exports.get_cart = async function (req, res) {
+  try {
+    const foundUser = await User.findOne({ username: req.user.username });
+    if (foundUser) {
+      const foundCart = await Cart.findOne({ user: foundUser._id });
+      if (foundCart) {
+        const idOfProducts = [];
+        foundCart.products.forEach((element) => {
+          idOfProducts.push(element.product_id);
+        });
+        const products = await Product.find({ _id: { $in: idOfProducts } });
+        res.status(200).json({ products });
+      } else {
+        let cart = new Cart({
+          user: foundUser._id,
+          products: [],
+        });
+
+        cart.save().then((data) => {
+          console.log("saved");
+          res.status(201).json({
+            message: "nothing in the cart",
+            products: cart.products,
+          });
+        });
+      }
+    } else {
+      errors.push({
+        key: "user",
+        errorText: "user not found!",
+      });
+      res.status(404).json({ errors: errors });
+      return;
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error });
+  }
+};
