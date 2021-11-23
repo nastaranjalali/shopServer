@@ -66,8 +66,52 @@ exports.add_product = async function (req, res) {
       return;
     } else {
       errors.push({
-        key: "name",
-        errorText: "this product already exists !",
+        key: "notFound",
+        errorText: "user or product does not exist !",
+      });
+      res.status(404).json({ errors: errors });
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error });
+  }
+};
+exports.delete_product = async function (req, res) {
+  var errors = [];
+  try {
+    const foundUser = await User.findOne({ username: req.user.username });
+    const foundProduct = await Product.findOne({ _id: req.params.id });
+
+    if (foundUser && foundProduct) {
+      let foundCart = await Cart.findOne({ user: foundUser._id });
+      if (foundCart) {
+        const productExistsInCart = foundCart.products.findIndex(
+          ({ product_id }) => product_id == foundProduct._id.toString()
+        );
+
+        if (productExistsInCart >= 0) {
+          foundCart.products.splice(productExistsInCart, 1);
+          await foundCart.save();
+          res.status(200).json({ foundCart, user: req.user });
+        } else {
+          errors.push({
+            key: "product",
+            errorText: "product not found!",
+          });
+        }
+      } else {
+        errors.push({
+          key: "cart",
+          errorText: "cart not found!",
+        });
+      }
+      res.status(404).json({ errors: errors });
+
+      return;
+    } else {
+      errors.push({
+        key: "notFound",
+        errorText: "user or product does not exist !",
       });
       res.status(409).json({ errors: errors });
     }
@@ -76,7 +120,6 @@ exports.add_product = async function (req, res) {
     res.status(500).json({ error: error });
   }
 };
-exports.delete_product = function (req, res) {};
 // exports.get_cart = function (req, res) {
 //   Product.find({}, (err, products) => {
 //     if (err) return handleError(err);
