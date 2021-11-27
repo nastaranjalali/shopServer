@@ -99,16 +99,19 @@ exports.delete_product = async function (req, res) {
             key: "product",
             errorText: "product not found!",
           });
+          res.status(404).json({ errors: errors });
+
+          return;
         }
       } else {
         errors.push({
           key: "cart",
           errorText: "cart not found!",
         });
-      }
-      res.status(404).json({ errors: errors });
+        res.status(404).json({ errors: errors });
 
-      return;
+        return;
+      }
     } else {
       errors.push({
         key: "notFound",
@@ -119,6 +122,7 @@ exports.delete_product = async function (req, res) {
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error });
+    return;
   }
 };
 exports.get_cart = async function (req, res) {
@@ -131,7 +135,14 @@ exports.get_cart = async function (req, res) {
         foundCart.products.forEach((element) => {
           idOfProducts.push(element.product_id);
         });
-        const products = await Product.find({ _id: { $in: idOfProducts } });
+        let products = await Product.find({ _id: { $in: idOfProducts } });
+        foundCart.products.forEach((element, index) => {
+          products[index] = {
+            ...products[index]._doc,
+            count: element.quantity,
+          };
+        });
+
         res.status(200).json({ products });
       } else {
         let cart = new Cart({
@@ -139,8 +150,7 @@ exports.get_cart = async function (req, res) {
           products: [],
         });
 
-        cart.save().then((data) => {
-          console.log("saved");
+        cart.save().then(() => {
           res.status(201).json({
             message: "nothing in the cart",
             products: cart.products,
