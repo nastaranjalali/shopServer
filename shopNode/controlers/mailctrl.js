@@ -4,7 +4,6 @@ const jwt = require("jsonwebtoken");
 const Product = require("../models/Product");
 
 exports.add_product = async function (req, res) {
-  console.log("req.body", req.body);
   try {
     var errors = [];
     const { name, price, img } = req.body;
