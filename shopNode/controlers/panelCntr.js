@@ -3,7 +3,6 @@ const Product = require("../models/Product");
 const Cart = require("../models/Cart");
 
 exports.add_product = async function (req, res) {
-  console.log("req.body", req.body);
   try {
     var errors = [];
     const { name, quantity } = req.body;
@@ -38,6 +37,7 @@ exports.add_product = async function (req, res) {
         );
 
         if (productExistsInCart >= 0) {
+          foundCart.totalPrice += foundProduct.price;
           foundCart.products[productExistsInCart].quantity += quantity;
           await foundCart.save();
           res.status(200).json({ foundCart, user: req.user });
@@ -46,6 +46,7 @@ exports.add_product = async function (req, res) {
             product_id: foundProduct._id,
             quantity: quantity,
           });
+          foundCart.totalPrice += foundProduct.price;
           foundCart.save();
           res.status(200).json({ added: true });
         }
@@ -53,6 +54,7 @@ exports.add_product = async function (req, res) {
         let cart = new Cart({
           user: foundUser._id,
           products: [{ product_id: foundProduct._id, quantity: quantity }],
+          totalPrice: foundProduct.price,
         });
 
         cart.save().then((data) => {
@@ -91,6 +93,10 @@ exports.delete_product = async function (req, res) {
         );
 
         if (productExistsInCart >= 0) {
+          foundCart.totalPrice -=
+            foundProduct.price *
+            foundCart.products[productExistsInCart].quantity;
+
           foundCart.products.splice(productExistsInCart, 1);
           await foundCart.save();
           res.status(200).json({ deleted: true });
@@ -143,7 +149,9 @@ exports.get_cart = async function (req, res) {
           };
         });
 
-        res.status(200).json({ products });
+        res
+          .status(200)
+          .json({ products: products, totalPrice: foundCart.totalPrice });
       } else {
         let cart = new Cart({
           user: foundUser._id,
@@ -170,7 +178,6 @@ exports.get_cart = async function (req, res) {
     res.status(500).json({ error: error });
   }
 };
-
 exports.set_quantity = async function (req, res) {
   try {
     var errors = [];
